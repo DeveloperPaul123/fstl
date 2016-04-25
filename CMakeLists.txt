@@ -30,7 +30,8 @@ src/glmesh.cpp
 src/loader.cpp
 src/main.cpp
 src/mesh.cpp
-src/window.cpp)
+src/window.cpp
+src/medical.cpp)
 
 #set project headers. 
 set(Project_Headers src/app.h
@@ -39,7 +40,8 @@ src/canvas.h
 src/glmesh.h
 src/loader.h
 src/mesh.h
-src/window.h)
+src/window.h
+src/medical.h)
 
 #set project resources and icon resource
 set(Project_Resources qt/qt.qrc gl/gl.qrc)

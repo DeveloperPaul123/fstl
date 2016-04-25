@@ -7,6 +7,8 @@
 #include <QtOpenGL/QGLShaderProgram>
 #include <QMatrix4x4>
 
+#include "medical.h"
+
 class GLMesh;
 class Mesh;
 class Backdrop;
@@ -26,7 +28,7 @@ public slots:
     void set_status(const QString& s);
     void clear_status();
     void load_mesh(Mesh* m);
-
+	void load_volume(UcharVolume *vol);
 
 protected:
     void mousePressEvent(QMouseEvent* event);
@@ -38,6 +40,7 @@ protected:
 
 private:
     void draw_mesh();
+	void draw_cloud();
 
     QMatrix4x4 transform_matrix() const;
     QMatrix4x4 view_matrix() const;
@@ -46,6 +49,7 @@ private:
     QGLShaderProgram quad_shader;
 
     GLMesh* mesh;
+	GLPointCloud* cloud;
     Backdrop* backdrop;
 
     QVector3D center;

@@ -14,7 +14,8 @@ Window::Window(QWidget *parent) :
     QMainWindow(parent),
     open_action(new QAction("Open", this)),
     about_action(new QAction("About", this)),
-    quit_action(new QAction("Quit", this))
+    quit_action(new QAction("Quit", this)),
+	open_mhd_action(new QAction("Open .mhd", this))
 
 {
 	QString title("fstl-%1");
@@ -43,10 +44,14 @@ Window::Window(QWidget *parent) :
     QObject::connect(about_action, &QAction::triggered,
                      this, &Window::on_about);
 
+	QObject::connect(open_mhd_action, &QAction::triggered,
+			this, &Window::on_open_mhd);
+
     auto file_menu = menuBar()->addMenu("File");
     file_menu->addAction(open_action);
+	file_menu->addAction(open_mhd_action);
     file_menu->addAction(quit_action);
-
+	
     auto help_menu = menuBar()->addMenu("Help");
     help_menu->addAction(about_action);
 
@@ -64,6 +69,15 @@ void Window::on_open()
     {
         load_stl(filename);
     }
+}
+
+void Window::on_open_mhd() {
+	QString filename = QFileDialog::getOpenFileName(
+		this, "Load .mhd file", QString(), "*.mhd");
+	if (!filename.isNull())
+	{
+		load_mhd(filename);
+	}
 }
 
 /**
@@ -143,6 +157,22 @@ bool Window::load_stl(const QString& filename)
 
     loader->start();
     return true;
+}
+
+bool Window::load_mhd(const QString &filename) {
+	MHDLoader *loader = new MHDLoader(this, filename);
+	connect(loader, &MHDLoader::started,
+		this, &Window::disable_open);
+	connect(loader, &MHDLoader::error,
+		this, &Window::on_bad_stl);
+	connect(loader, &MHDLoader::finished,
+		loader, &MHDLoader::deleteLater);
+	connect(loader, &MHDLoader::finished,
+		this, &Window::enable_open);
+	connect(loader, &MHDLoader::loaded_volume,
+		canvas, &Canvas::load_volume);
+	loader->start();
+	return true;
 }
 
 /**
