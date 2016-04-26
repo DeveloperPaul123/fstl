@@ -21,7 +21,8 @@ void MHDLoader::run() {
 }
 
 /**
-* Reads a volume and header. 
+* Reads a .mhd header and the corresponding .raw file as a volume. 
+* @return UcharVolume a volume with type uchar. 
 */
 UcharVolume* MHDLoader::readVolume() {
 	//first read the header file.
