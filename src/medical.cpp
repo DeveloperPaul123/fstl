@@ -72,7 +72,7 @@ UcharVolume* MHDLoader::readVolume() {
 			Slice<uchar> curSlice(xDim, yDim);
 			for (int y = 0; y < yDim; y++) {
 				for (int x = 0; x < xDim; x++) {
-					int position = x + (y*yDim) + (z*(yDim*xDim));
+					int position = x + (y*xDim) + (z*(yDim*xDim));
 					curSlice.setData(x, y, rawData.at(position));
 				}
 			}
@@ -144,8 +144,6 @@ vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer) {
 	vertices.setUsagePattern(QGLBuffer::StaticDraw);
 	indices.setUsagePattern(QGLBuffer::StaticDraw);
 
-	std::vector<GLfloat> mVerts;
-	std::vector<GLuint> mInd;
 	int pointCount = 0;
 	int size = vol->getNumSlices();
 	for (int i = 0; i < size; i++) {
@@ -154,9 +152,9 @@ vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer) {
 			for (int x = 0; x < slice.getXSize(); x++) {
 				uchar data = slice.getData(x, y);
 				if (data != 0) {
-					mVerts.push_back(GLfloat(x));
-					mVerts.push_back(GLfloat(y));
-					mVerts.push_back(GLfloat(i));
+					mVerts.push_back((float)x);
+					mVerts.push_back((float)y);
+					mVerts.push_back((float)i);
 					mInd.push_back(pointCount);
 					pointCount++;
 				}
@@ -185,4 +183,32 @@ void GLPointCloud::draw(GLuint vp) {
 
 	vertices.release();
 	indices.release();
+}
+
+/**
+* Gets the minimum of the mesh.
+* @param start the axis to search on. 0 = x, 1 = y, 2 = z.
+*/
+float GLPointCloud::min(size_t start) const
+{
+	float v = mVerts[start];
+	for (size_t i = start; i < mVerts.size(); i += 3)
+	{
+		v = fmin(v, mVerts[i]);
+	}
+	return v;
+}
+
+/**
+* Gets the max of the mesh.
+* @param start the axis to search on. 0 = x, 1 = y, 2 = z.
+*/
+float GLPointCloud::max(size_t start) const
+{
+	float v = mVerts[start];
+	for (size_t i = start; i < mVerts.size(); i += 3)
+	{
+		v = fmax(v, mVerts[i]);
+	}
+	return v;
 }

@@ -44,13 +44,13 @@ void Canvas::load_mesh(Mesh* m)
 void Canvas::load_volume(UcharVolume *vol) {
 	mesh = NULL;
 	cloud = new GLPointCloud(vol);
-	center = QVector3D(0,
-		0,
-		0);
+	center = QVector3D(cloud->xmin() + cloud->xmax(),
+		cloud->ymin() + cloud->ymax(),
+		cloud->zmin() + cloud->zmax())/2;
 	scale = 2 / sqrt(
-		pow(1, 2) +
-		pow(1, 2) +
-		pow(1, 2));
+		pow(cloud->xmax() - cloud->xmin(), 2) +
+		pow(cloud->ymax() - cloud->ymin(), 2) +
+		pow(cloud->zmax() - cloud->zmin(), 2));
 
 	// Reset other camera parameters
 	zoom = 1;
