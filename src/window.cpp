@@ -15,7 +15,8 @@ Window::Window(QWidget *parent) :
     open_action(new QAction("Open", this)),
     about_action(new QAction("About", this)),
     quit_action(new QAction("Quit", this)),
-	open_mhd_action(new QAction("Open .mhd", this))
+	open_mhd_action(new QAction("Open .mhd", this)),
+	open_mesh_action(new QAction("Open .mesh", this))
 
 {
 	QString title("fstl-%1");
@@ -47,11 +48,14 @@ Window::Window(QWidget *parent) :
 	QObject::connect(open_mhd_action, &QAction::triggered,
 			this, &Window::on_open_mhd);
 
+	QObject::connect(open_mesh_action, &QAction::triggered,
+		this, &Window::on_open_mesh);
+
     auto file_menu = menuBar()->addMenu("File");
     file_menu->addAction(open_action);
 	file_menu->addAction(open_mhd_action);
+	file_menu->addAction(open_mesh_action);
     file_menu->addAction(quit_action);
-	
     auto help_menu = menuBar()->addMenu("Help");
     help_menu->addAction(about_action);
 
@@ -77,6 +81,15 @@ void Window::on_open_mhd() {
 	if (!filename.isNull())
 	{
 		load_mhd(filename);
+	}
+}
+
+void Window::on_open_mesh() {
+	QString filename = QFileDialog::getOpenFileName(
+		this, "Load .mesh file", QString(), "*.mesh");
+	if (!filename.isNull())
+	{
+		load_mesh(filename);
 	}
 }
 
@@ -171,8 +184,41 @@ bool Window::load_mhd(const QString &filename) {
 		this, &Window::enable_open);
 	connect(loader, &MHDLoader::loaded_volume,
 		canvas, &Canvas::load_volume);
+	connect(loader, &MHDLoader::loaded_volume,
+		this, &Window::save_inr);
+	connect(loader, &MHDLoader::loaded_file,
+		canvas, &Window::setWindowTitle);
 	loader->start();
 	return true;
+}
+
+bool Window::load_mesh(const QString &filename) {
+	MeshUtil::MeshLoader *loader = new MeshUtil::MeshLoader(this, filename);
+	loader->start();
+	return true;
+}
+
+void Window::save_inr(UcharVolume *vol) {
+	INRSaver *saver = new INRSaver(this, vol);
+	connect(saver, &INRSaver::volumeSavedSuccessfully,
+		this, &Window::on_inr_saved);
+	connect(saver, &INRSaver::volumeSaveFailed,
+		this, &Window::on_inr_save_failed);
+	connect(saver, &INRSaver::finished,
+		saver, &INRSaver::deleteLater);
+	saver->start();
+}
+
+void Window::on_inr_saved() {
+	QMessageBox::information(this, "Success",
+		"<b>Success:</b><br>"
+		"The <code>.inr</code> file was successfully saved.<br>");
+}
+
+void Window::on_inr_save_failed() {
+	QMessageBox::critical(this, "Error",
+		"<b>Error:</b><br>"
+		"The <code>.inr</code> file could not be saved.");
 }
 
 /**

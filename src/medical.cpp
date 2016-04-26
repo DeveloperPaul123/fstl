@@ -80,7 +80,6 @@ UcharVolume* MHDLoader::readVolume() {
 			vol->addSlice(curSlice, z);
 		}
 	}
-
 	return vol;
 }
 
@@ -212,4 +211,84 @@ float GLPointCloud::max(size_t start) const
 		v = fmax(v, mVerts[i]);
 	}
 	return v;
+}
+
+/**
+* Class for saving a volume as an inr image stack. 
+* @param parent QObject parent
+* @param UcharVolume the unsigned char volume to save. 
+*/
+INRSaver::INRSaver(QObject * parent, UcharVolume *vol) :
+QThread(parent){
+	//copy volume. 
+	mVol = new UcharVolume(*vol);
+}
+
+/**
+* Run the inr saver. 
+*/
+void INRSaver::run() {
+	bool saved = saveVolume();
+	if (saved) {
+		emit(volumeSavedSuccessfully());
+	}
+	else {
+		emit(volumeSaveFailed());
+	}
+}
+
+/**
+* Saves the actual volume. 
+* @return true if saved successfully, false otherwise. 
+*/
+bool INRSaver::saveVolume() {
+	if (mVol) {
+		std::ofstream output;
+		output.open("C:\\Users\\Paul T\\Desktop\\test.inr", std::ios_base::binary | std::ios_base::out);
+		int start = output.tellp();
+		output << '#' << 'I' << 'N' << 'R' << 'I' << 'M' << 'A' << 'G' << 'E' << '-' << '4' << '#' << '{' << '\n';
+		int xDim = mVol->getXDim();
+		int yDim = mVol->getYDim();
+		int zDim = mVol->getZDim();
+
+		output << 'X' <<'D' <<'I' << 'M' << '=' << xDim << '\n';
+		output << 'Y' << 'D' << 'I' << 'M' << '=' << yDim << '\n';
+		output << 'Z' << 'D' << 'I' << 'M' << '=' << zDim << '\n';
+		output << 'V' << 'D' << 'I' << 'M' << '=' << 1 << '\n';
+		output << 'V'<<'X'<<'=' << mVol->getXVoxel() << '\n';
+		output << 'V' << 'Y' << '=' << mVol->getYVoxel() << '\n';
+		output << 'V' << 'Z' << '=' << mVol->getZVoxel() << '\n';
+		output << 'T' << 'Y' << 'P' << 'E' << '=' << 'u' << 'n' << 's' << 'i' << 'g' << 'n' << 'e' << 'd' << ' ' << 'f' << 'i' << 'x' << 'e' << 'd' << '\n';
+		output << 'P' << 'I' << 'X' << 'S' << 'I' << 'Z' << 'E' << '=' << 8 << ' ' << 'b' << 'i' << 't' << 's' << '\n';
+		output << 'S' << 'C' << 'A' << 'L' << 'E' << '=' << '2' << '*' << '*' << '0' << '\n';
+		output << 'C' << 'P' << 'U' << '=' << 'd' << 'e' << 'c' << 'm' << '\n';
+		int soFar = output.tellp();
+		int dif = soFar - start;
+		int bSize = (dif * sizeof(char));
+		int remainder = 256 - bSize - 5;
+		for (int i = 0; i < remainder; i++) {
+			output << '\n';
+		}
+		output << '#' <<'#'<<'}' << '\n';
+		
+		//now write the pixel data, row by row, column by column, slice by slice. 
+		int slices = mVol->getNumSlices();
+		for (int z = 0; z < slices; z++) {
+			//get the slice. 
+			Slice<uchar> slice = mVol->getSlice(z);
+			int xDim = slice.getXSize();
+			int yDim = slice.getYSize();
+			for (int y = 0; y < yDim; y++) {
+				for (int x = 0; x < xDim; x++) {
+					//go through one row at a time and write each column. 
+					uchar val = slice.getData(x, y);
+					output << val;
+				}
+			}
+		}
+		
+		output.close();
+		return true;
+	}
+	return false;
 }

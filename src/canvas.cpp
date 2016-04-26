@@ -119,10 +119,8 @@ void Canvas::draw_cloud() {
 	// Find and enable the attribute location for vertex position
 	const GLuint vp = mesh_shader.attributeLocation("vertex_position");
 	glEnableVertexAttribArray(vp);
-
 	// Then draw the mesh with that vertex position
 	cloud->draw(vp);
-
 	// Clean up state machine
 	glDisableVertexAttribArray(vp);
 	mesh_shader.release();

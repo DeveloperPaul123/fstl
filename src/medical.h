@@ -1,6 +1,8 @@
 #ifndef MEDICAL_H
 #define MEDICAL_H
 #include <vector>
+#include <iostream>
+#include <fstream>
 #include <QObject>
 #include <QString>
 #include <QThread>
@@ -59,6 +61,9 @@ private:
 	int mXDim, mYDim;
 };
 
+/**
+* Template class representing a .mhd and .raw volume. 
+*/
 template<class T> class Volume {
 public:
 	Volume<T>(int x, int y, int z, float xSpacing, float ySpacing, float zSpacing) {
@@ -83,6 +88,18 @@ public:
 		return _zDim;
 	}
 
+	float getXVoxel() {
+		return _xSp;
+	}
+
+	float getYVoxel() {
+		return _ySp;
+	}
+
+	float getZVoxel() {
+		return _zSp;
+	}
+
 	int getNumSlices() {
 		return data.size();
 	}
@@ -99,11 +116,13 @@ private:
 	float _xSp, _ySp, _zSp;
 };
 
+/**
+* Volume for unsigned char type. 
+*/
 class UcharVolume : public Volume<uchar>{
 public:
 	UcharVolume(int x, int y, int z, float xSpacing, float ySpacing, float zSpacing) : 
 		Volume<uchar>(x, y, z, xSpacing, ySpacing, zSpacing) {
-
 	}
 };
 
@@ -125,6 +144,24 @@ signals :
 private:
 	const QString filename;
 	MHDInfo readHeaderInfo();
+};
+
+class INRSaver : public QThread {
+	Q_OBJECT
+
+public:
+	explicit INRSaver(QObject *parent, UcharVolume *vol);
+	void run();
+
+protected:
+	bool saveVolume();
+
+signals:
+	void volumeSavedSuccessfully();
+	void volumeSaveFailed();
+
+private:
+	UcharVolume* mVol;
 };
 
 class GLPointCloud : protected QGLFunctions {
