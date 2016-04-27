@@ -193,7 +193,15 @@ bool Window::load_mhd(const QString &filename) {
 }
 
 bool Window::load_mesh(const QString &filename) {
-	MeshUtil::MeshLoader *loader = new MeshUtil::MeshLoader(this, filename);
+	MeshUtil::MeshParams params;
+	params.xOffset = -33.6875;
+	params.yOffset = -21.6805;
+	params.zOffset = -13.4055;
+	MeshUtil::MeshLoader *loader = new MeshUtil::MeshLoader(this, filename, params);
+	connect(loader, &MeshUtil::MeshLoader::meshLoaded,
+		canvas, &Canvas::load_mesh_file);
+	connect(loader, &MeshUtil::MeshLoader::finished,
+		loader, &MeshUtil::MeshLoader::deleteLater);
 	loader->start();
 	return true;
 }

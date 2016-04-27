@@ -9,7 +9,7 @@
 #include "mesh.h"
 
 Canvas::Canvas(const QGLFormat& format, QWidget *parent)
-	: QGLWidget(format, parent), mesh(NULL), cloud(NULL),
+	: QGLWidget(format, parent), mesh(NULL), cloud(NULL), meshFromFile(NULL),
       scale(1), zoom(1), tilt(90), yaw(0), status(" ")
 {
     // Nothing to do here
@@ -43,6 +43,7 @@ void Canvas::load_mesh(Mesh* m)
 
 void Canvas::load_volume(UcharVolume *vol) {
 	mesh = NULL;
+	meshFromFile = NULL;
 	cloud = new GLPointCloud(vol);
 	center = QVector3D(cloud->xmin() + cloud->xmax(),
 		cloud->ymin() + cloud->ymax(),
@@ -60,6 +61,24 @@ void Canvas::load_volume(UcharVolume *vol) {
 	update();
 }
 
+void Canvas::load_mesh_file(MeshUtil::Mesh* m) {
+	mesh = NULL;
+	cloud = NULL;
+	meshFromFile = new MeshUtil::GLMesh(m);
+	center = QVector3D(meshFromFile->xmin() + meshFromFile->xmax(),
+		meshFromFile->ymin() + meshFromFile->ymax(),
+		meshFromFile->zmin() + meshFromFile->zmax()) / 2;
+	scale = 2 / sqrt(
+		pow(meshFromFile->xmax() - meshFromFile->xmin(), 2) +
+		pow(meshFromFile->ymax() - meshFromFile->ymin(), 2) +
+		pow(meshFromFile->zmax() - meshFromFile->zmin(), 2));
+	zoom = 1;
+	yaw = 0;
+	tilt = 90;
+
+	update();
+
+}
 void Canvas::set_status(const QString &s)
 {
     status = s;
@@ -94,12 +113,37 @@ void Canvas::paintEvent(QPaintEvent *event)
     backdrop->draw();
     if (mesh)  draw_mesh();
 	else if (cloud) draw_cloud();
+	else if (meshFromFile) draw_mesh_file();
 
     if (status.isNull())    return;
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.drawText(10, height() - 10, status);
+}
+
+void Canvas::draw_mesh_file() {
+	mesh_shader.bind();
+
+	// Load the transform and view matrices into the shader
+	glUniformMatrix4fv(
+		mesh_shader.uniformLocation("transform_matrix"),
+		1, GL_FALSE, transform_matrix().data());
+	glUniformMatrix4fv(
+		mesh_shader.uniformLocation("view_matrix"),
+		1, GL_FALSE, view_matrix().data());
+
+	// Compensate for z-flattening when zooming
+	glUniform1f(mesh_shader.uniformLocation("zoom"), 1 / zoom);
+
+	// Find and enable the attribute location for vertex position
+	const GLuint vp = mesh_shader.attributeLocation("vertex_position");
+	glEnableVertexAttribArray(vp);
+	// Then draw the mesh with that vertex position
+	meshFromFile->draw(vp);
+	// Clean up state machine
+	glDisableVertexAttribArray(vp);
+	mesh_shader.release();
 }
 
 void Canvas::draw_cloud() {

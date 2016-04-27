@@ -25,6 +25,7 @@ struct MHDInfo {
 	bool isBinary = false;
 	std::vector<float> spacing;
 	std::vector<int> dims;
+	std::vector<float> offset;
 	MHDElementType type = MET_UCHAR;
 	QString filename;
 };
@@ -66,6 +67,15 @@ private:
 */
 template<class T> class Volume {
 public:
+	/**
+	* Class that encapsulates a volume. 
+	* @param x the x dimension size.
+	* @param y the y dimension size.
+	* @param z the z dimension size.
+	* @param xSpacing the voxel size in x
+	* @param ySpacing the voxel size in y
+	* @param zSpacing the voxel size in z
+	*/
 	Volume<T>(int x, int y, int z, float xSpacing, float ySpacing, float zSpacing) {
 		data.reserve(z);
 		for (int i = 0; i < z; i++) {
@@ -77,43 +87,124 @@ public:
 		_xSp = xSpacing;
 		_ySp = ySpacing;
 		_zSp = zSpacing;
+		_xOff = 0.0;
+		_yOff = 0.0;
+		_zOff = 0.0;
 	}
+
+	/**
+	* Set offsets in x y and z.
+	* @param xOff the x offset. 
+	* @param yOff the y offset.
+	* @param zOff the z offset. 
+	*/
+	void setOffset(float xOff, float yOff, float zOff) {
+		_xOff = xOff;
+		_yOff = yOff;
+		_zOff = zOff;
+	}
+
+	/**
+	* Returns the x offset.
+	* @return x offset.
+	*/
+	float getXOffset() {
+		return _xOff;
+	}
+
+	/**
+	* Return the y offset.
+	* @return y offset. 
+	*/
+	float getYOffset() {
+		return _yOff;
+	}
+
+	/**
+	* Returns the z offset.
+	* @return z offset. 
+	*/
+	float getZOffset() {
+		return _zOff;
+	}
+
+	/**
+	* Returns the x dimension.
+	* @return the x dimension.
+	*/
 	int getXDim() {
 		return _xDim;
 	}
+
+	/**
+	* Returns the y dimension.
+	* @return the y dimension.
+	*/
 	int getYDim(){
 		return _yDim;
 	}
+
+	/**
+	* Returns the z dimension.
+	* @return the z dimension.
+	*/
 	int getZDim() {
 		return _zDim;
 	}
 
+	/**
+	* Returns the x voxel size.
+	* @return the x voxel size.
+	*/
 	float getXVoxel() {
 		return _xSp;
 	}
 
+	/**
+	* Returns the y voxel size.
+	* @return the y voxel size.
+	*/
 	float getYVoxel() {
 		return _ySp;
 	}
 
+	/**
+	* Returns the z voxel size.
+	* @return the z voxel size. 
+	*/
 	float getZVoxel() {
 		return _zSp;
 	}
 
+	/**
+	* Returns the total number of slices in the volume. 
+	* @return int the total slices. 
+	*/
 	int getNumSlices() {
 		return data.size();
 	}
 
+	/**
+	* Returns a Slice<T> at a given index. 
+	* @param index the index to look for a slice.
+	* @return Slice<T> the slice at the given index. 
+	*/
 	Slice<T> getSlice(int index) {
 		return data[index];
 	}
+	
+	/**
+	* Adds a given slice to at the given index to the volume. 
+	* @param slice the slice to add. 
+	* @param index where to add the slice. 
+	*/
 	void addSlice(Slice<T> slice, int index) {
 		data[index] = slice;
 	}
 private:
 	std::vector<Slice<T>> data;
 	int _xDim, _yDim, _zDim;
-	float _xSp, _ySp, _zSp;
+	float _xSp, _ySp, _zSp, _xOff, _yOff, _zOff;
 };
 
 /**

@@ -8,6 +8,7 @@
 #include <QMatrix4x4>
 
 #include "medical.h"
+#include "mesh_util.h"
 
 class GLMesh;
 class Mesh;
@@ -29,7 +30,7 @@ public slots:
     void clear_status();
     void load_mesh(Mesh* m);
 	void load_volume(UcharVolume *vol);
-
+	void load_mesh_file(MeshUtil::Mesh *m);
 protected:
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
@@ -41,7 +42,7 @@ protected:
 private:
     void draw_mesh();
 	void draw_cloud();
-
+	void draw_mesh_file();
     QMatrix4x4 transform_matrix() const;
     QMatrix4x4 view_matrix() const;
 
@@ -50,6 +51,7 @@ private:
 
     GLMesh* mesh;
 	GLPointCloud* cloud;
+	MeshUtil::GLMesh *meshFromFile;
     Backdrop* backdrop;
 
     QVector3D center;

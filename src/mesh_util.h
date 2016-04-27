@@ -14,10 +14,28 @@
 #include <QTextStream>
 #include <QDataStream>
 
-namespace MeshUtil {
-	static std::vector<std::string> &split(const std::string &s, char delim, std::vector<std::string> &elems);
-	static std::vector<std::string> split(const std::string &s, char delim);
+#include <QtOpenGL/QGLBuffer>
+#include <QtOpenGL/QGLFunctions>
 
+namespace MeshUtil {
+	template <class T>
+	void reorder(std::vector<T> &v, std::vector<size_t> const &order)  {
+		for (int s = 1, d; s < order.size(); ++s) {
+			for (d = order[s]; d < s; d = order[d]);
+			if (d == s) while (d = order[d], d != s) std::swap(v[s], v[d]);
+		}
+
+	}
+	struct MeshParams {
+		float xOffset;
+		float yOffset;
+		float zOffset;
+		MeshParams() {
+			xOffset = 0.0;
+			yOffset = 0.0;
+			zOffset = 0.0;
+		}
+	};
 	struct Point {
 		Point() {
 			x = 0.0;
@@ -39,7 +57,12 @@ namespace MeshUtil {
 			return sqrtf(pow(xDif, 2.0) + pow(yDif, 2.0) + pow(zDif, 2.0));
 		}
 	};
+
 	struct Triangle {
+		int x;
+		int y;
+		int z;
+
 		Triangle() {
 			x = 0;
 			y = 0;
@@ -50,9 +73,49 @@ namespace MeshUtil {
 			y = y1;
 			z = z1;
 		}
-		int x;
-		int y;
-		int z;
+
+		void sort() {
+			std::vector<int> vals;
+			vals.push_back(x);
+			vals.push_back(y);
+			vals.push_back(z);
+			std::sort(vals.begin(), vals.end());
+			x = vals[0];
+			y = vals[1];
+			z = vals[2];
+		}
+		/**
+		* Comparison operator for sorting. Sort by x, then y, then z
+		* @param other other Triangle to compare to.
+		* @return true if this Triangle is less than the other.
+		*/
+		bool operator<(const Triangle &other) const {
+			if (x == other.x) {
+				if (y != other.y) {
+					return y < other.y;
+				}
+				else {
+					if (z != other.z) {
+						return z < other.z;
+					}
+					else {
+						return false;
+					}
+				}
+			}
+			else {
+				return x < other.x;
+			}
+		}
+
+		/**
+		* Comparison operator for unique algorithm. Compares across x, y, z
+		* @param other the Triangle to compare against.
+		* @return true if all values are equal, false otherwise.
+		*/
+		bool operator==(const Triangle &other) const {
+			return x == other.x && y == other.y && z == other.z;
+		}
 	};
 
 	struct Tetrahedron {
@@ -72,7 +135,54 @@ namespace MeshUtil {
 		int y;
 		int z;
 		int h;
+
+		/**
+		* Comparison operator for sorting. Sort by x, then y, then z then h.
+		* @param other other tetrahedron to compare to. 
+		* @return true if this tetrahedron is less than the other. 
+		*/
+		bool operator<(const Tetrahedron &other) const {
+			if (x == other.x) {
+				if (y != other.y) {
+					return y < other.y;
+				}
+				else {
+					if (z != other.z) {
+						return z < other.z;
+					}
+					else {
+						if (h != other.h) {
+							return h < other.h;
+						}
+						else {
+							return false;
+						}
+					}
+				}
+			}
+			else {
+				return x < other.x;
+			}
+		}
+
+		/**
+		* Comparison operator for unique algorithm. Compares across x, y, z and h.
+		* @param other the Tetrahedron to compare against.
+		* @return true if all values are equal, false otherwise. 
+		*/
+		bool operator==(const Tetrahedron &other) const {
+			return x == other.x && y == other.y && z == other.z && h == other.h;
+		}
 	};
+
+	/**
+	* Checks a vector of tetrahedron against a vector of nodes (index points from the verticies) to
+	* see if a given node is a member of the tetrahedron, if it is, it will be in the returned vector.
+	* @param tets the vector of tetrahedrons
+	* @param nodes vector of nodes to look for.
+	* @return std::vector<Tetrahedron> new vector of tetrahedron that had members matching the nodes.
+	*/
+	std::vector<Tetrahedron> isMember(std::vector<Tetrahedron> tets, std::vector<int> nodes);
 
 	class Mesh {
 	public:
@@ -84,18 +194,41 @@ namespace MeshUtil {
 		void setTriangle(Triangle newT, int index);
 		Tetrahedron getTetrahedron(int index);
 		void setTetrahedron(Tetrahedron tetra, int index);
+		std::vector<Triangle> getSurfaceFaces();
+
 	private:
 		std::vector<Point> verts;
 		std::vector<Triangle> tris;
 		std::vector<Tetrahedron> tetras;
 	};
 
-	
+	class GLMesh : protected QGLFunctions
+	{
+	public:
+		GLMesh(Mesh* mesh);
+		void draw(GLuint vp);
+		float min(size_t start) const;
+		float max(size_t start) const;
+
+		float xmin() const { return min(0); }
+		float ymin() const { return min(1); }
+		float zmin() const { return min(2); }
+		float xmax() const { return max(0); }
+		float ymax() const { return max(1); }
+		float zmax() const { return max(2); }
+	private:
+		QGLBuffer vertices;
+		QGLBuffer indices;
+
+		std::vector<GLfloat> mVerts;
+		std::vector<GLuint> mInd;
+	};
+
 	class MeshLoader : public QThread{
 		Q_OBJECT
 
 	public: 
-		explicit MeshLoader(QObject *parent, QString filename);
+		explicit MeshLoader(QObject *parent, QString filename, MeshParams params);
 		void run();
 
 	signals:
@@ -105,6 +238,7 @@ namespace MeshUtil {
 		Mesh* readMeshFromFile();
 	private:
 		QString filename;
+		MeshParams params;
 	};
 }
 #endif

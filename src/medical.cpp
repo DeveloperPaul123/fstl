@@ -129,6 +129,15 @@ MHDInfo MHDLoader::readHeaderInfo() {
 				}
 				info.spacing = f;
 			}
+			else if (dataItem == "offset") {
+				QString spac = items.at(1);
+				QStringList l = spac.split(" ");
+				std::vector<float> f;
+				for (int i = 0; i < l.length(); i++) {
+					f.push_back(l.at(i).trimmed().toFloat());
+				}
+				info.offset = f;
+			}
 		}
 	}
 	return info;
@@ -152,9 +161,21 @@ vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer) {
 			for (int x = 0; x < slice.getXSize(); x++) {
 				uchar data = slice.getData(x, y);
 				if (data != 0) {
-					mVerts.push_back((float)x);
-					mVerts.push_back((float)y);
-					mVerts.push_back((float)i);
+					float xVal = (float)x;
+					float yVal = (float)y;
+					float zVal = (float)i;
+					if (vol->getXOffset() != 0.0) {
+						xVal += vol->getXOffset();
+					}
+					if (vol->getYOffset() != 0.0) {
+						yVal += vol->getYOffset();
+					}
+					if (vol->getZOffset() != 0.0) {
+						zVal += vol->getZOffset();
+					}
+					mVerts.push_back(xVal);
+					mVerts.push_back(yVal);
+					mVerts.push_back(zVal);
 					mInd.push_back(pointCount);
 					pointCount++;
 				}
@@ -162,17 +183,23 @@ vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer) {
 		}
 	}
 
+	//allocate the verticies
 	vertices.bind();
 	vertices.allocate(mVerts.data(),
 		mVerts.size() * sizeof(float));
 	vertices.release();
 
+	//allocate the indices
 	indices.bind();
 	indices.allocate(mInd.data(),
 		mInd.size() * sizeof(uint32_t));
 	indices.release();
 }
 
+/**
+* Draw the point cloud in the opengl scene. 
+* @param vp the GLuint to draw around. 
+*/
 void GLPointCloud::draw(GLuint vp) {
 	vertices.bind();
 	indices.bind();
@@ -244,6 +271,7 @@ void INRSaver::run() {
 bool INRSaver::saveVolume() {
 	if (mVol) {
 		std::ofstream output;
+		//open as binary. 
 		output.open("C:\\Users\\Paul T\\Desktop\\test.inr", std::ios_base::binary | std::ios_base::out);
 		int start = output.tellp();
 		output << '#' << 'I' << 'N' << 'R' << 'I' << 'M' << 'A' << 'G' << 'E' << '-' << '4' << '#' << '{' << '\n';
