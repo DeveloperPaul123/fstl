@@ -18,8 +18,14 @@ Canvas::Canvas(const QGLFormat& format, QWidget *parent)
 Canvas::~Canvas()
 {
     delete mesh;
+	delete cloud;
+	delete meshFromFile;
 }
 
+/**
+* Load a mesh into the canvas.
+* @param m the Mesh to load. 
+*/
 void Canvas::load_mesh(Mesh* m)
 {
     mesh = new GLMesh(m);
@@ -41,6 +47,10 @@ void Canvas::load_mesh(Mesh* m)
     delete m;
 }
 
+/**
+* Load a volume to display as a point cloud. 
+* @param vol the volume to display. 
+*/
 void Canvas::load_volume(UcharVolume *vol) {
 	mesh = NULL;
 	meshFromFile = NULL;
@@ -61,6 +71,10 @@ void Canvas::load_volume(UcharVolume *vol) {
 	update();
 }
 
+/**
+* Loads a mesh from a MEDIT .mesh file (created by cgal mesh generator).
+* @param m the MEDIT .mesh to render. 
+*/
 void Canvas::load_mesh_file(MeshUtil::Mesh* m) {
 	mesh = NULL;
 	cloud = NULL;
@@ -79,18 +93,29 @@ void Canvas::load_mesh_file(MeshUtil::Mesh* m) {
 	update();
 
 }
+
+/**
+* Sets the currently diplayed status of the canvas. 
+* @param s the status to set. 
+*/
 void Canvas::set_status(const QString &s)
 {
     status = s;
     update();
 }
 
+/**
+* Clears the current status. 
+*/
 void Canvas::clear_status()
 {
     status = "";
     update();
 }
 
+/**
+*
+*/
 void Canvas::initializeGL()
 {
     initializeGLFunctions();
@@ -104,22 +129,36 @@ void Canvas::initializeGL()
 
 void Canvas::paintEvent(QPaintEvent *event)
 {
-    Q_UNUSED(event);
-
-    glClearColor(0.0, 0.0, 0.0, 0.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glEnable(GL_DEPTH_TEST);
-
-    backdrop->draw();
-    if (mesh)  draw_mesh();
+	Q_UNUSED(event);
+    if (status.isNull())    return;
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	backdrop->draw();
+	if (mesh)  draw_mesh();
 	else if (cloud) draw_cloud();
 	else if (meshFromFile) draw_mesh_file();
-
-    if (status.isNull())    return;
-
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.drawText(10, height() - 10, status);
+}
+
+/**
+* Called when the window is resized. 
+* @param width the new width.
+* @param height the new height. 
+*/
+void Canvas::resizeGL(int width, int height) {
+	glViewport(0, 0, width, height);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+#ifdef QT_OPENGL_ES_1
+	glOrthof(-2, +2, -2, +2, 1.0, 15.0);
+#else
+	glOrtho(-2, +2, -2, +2, 1.0, 15.0);
+#endif
+	glMatrixMode(GL_MODELVIEW);
 }
 
 void Canvas::draw_mesh_file() {

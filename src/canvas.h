@@ -20,9 +20,6 @@ class Canvas : public QGLWidget, protected QGLFunctions
 
 public:
     Canvas(const QGLFormat& format, QWidget* parent=0);
-
-    void initializeGL();
-
     ~Canvas();
 
 public slots:
@@ -31,7 +28,10 @@ public slots:
     void load_mesh(Mesh* m);
 	void load_volume(UcharVolume *vol);
 	void load_mesh_file(MeshUtil::Mesh *m);
+
 protected:
+	void initializeGL();
+	void resizeGL(int width, int height);
     void mousePressEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);

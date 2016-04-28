@@ -1,6 +1,11 @@
 #include "glmesh.h"
 #include "mesh.h"
 
+/**
+* Simple open gl mesh object. Constructed from a mesh object that
+* represents an .stl file. 
+* @param mesh a Mesh pointer. 
+*/
 GLMesh::GLMesh(const Mesh* const mesh)
     : vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer)
 {
@@ -23,6 +28,9 @@ GLMesh::GLMesh(const Mesh* const mesh)
     indices.release();
 }
 
+/**
+* Draw the mesh into the open gl widget. 
+*/
 void GLMesh::draw(GLuint vp)
 {
     vertices.bind();
