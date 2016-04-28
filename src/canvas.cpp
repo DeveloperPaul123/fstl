@@ -114,7 +114,7 @@ void Canvas::clear_status()
 }
 
 /**
-*
+* Initializes the GL. 
 */
 void Canvas::initializeGL()
 {
@@ -278,7 +278,7 @@ void Canvas::mouseReleaseEvent(QMouseEvent* event)
     {
         unsetCursor();
     }
-}
+}	
 
 void Canvas::mouseMoveEvent(QMouseEvent* event)
 {
@@ -287,7 +287,7 @@ void Canvas::mouseMoveEvent(QMouseEvent* event)
 
     if (event->buttons() & Qt::LeftButton)
     {
-		yaw = yaw + d.x();
+		yaw = yaw - d.x();
 		tilt = tilt - d.y();
         update();
     }

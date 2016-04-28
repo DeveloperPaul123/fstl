@@ -302,7 +302,7 @@ namespace MeshUtil {
 
 	void GLMesh::draw(GLuint vp)
 	{
-		vertices.bind();
+		/*vertices.bind();
 		indices.bind();
 
 		glVertexAttribPointer(vp, 3, GL_FLOAT, false, 3 * sizeof(float), NULL);
@@ -310,7 +310,13 @@ namespace MeshUtil {
 			GL_UNSIGNED_INT, NULL);
 
 		vertices.release();
-		indices.release();
+		indices.release();*/
+
+		glBegin(GL_TRIANGLES);
+		for (int i = 0; i < mVerts.size(); i+=3) {
+			glVertex3f(mVerts[i], mVerts[i + 1], mVerts[i + 2]);
+		}
+		glEnd();
 	}
 
 	/**
