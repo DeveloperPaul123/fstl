@@ -30,8 +30,16 @@ struct MHDInfo {
 	QString filename;
 };
 
+/**
+* Template class representing a volume slice. 
+*/
 template<class T> class Slice {
 public:
+	/**
+	* Represents a single slice in a larger cbct volume. 
+	* @param xSize the x dimension of the slice.
+	* @param ySize the y dimension of the slice. 
+	*/
 	Slice<T>(int xSize, int ySize) {
 		mXDim = xSize;
 		mYDim = ySize;
@@ -44,17 +52,50 @@ public:
 			mData.push_back(data);
 		}
 	}
+	/**
+	* Returns the x dimension of the slice. 
+	* @return int the x dim.
+	*/
 	int getXSize() {
 		return mXDim;
 	}
+
+	/**
+	* Returns the y dimension of the slice. 
+	* @param int the y dim. 
+	*/
 	int getYSize() {
 		return mYDim;
 	}
+	
+	/**
+	* Populate the slice with data at a given x, y coordinate. 
+	* @param x the x position.
+	* @param y the y position. 
+	* @param val the value to insert. 
+	*/
 	void setData(int x, int y, T val) {
-		mData[x][y] = val;
+		if (x >= 0 && x < mXDim && y >= 0 && y < mYDim) {
+			mData[x][y] = val;
+		}		
+		else {
+			throw new std::exception("Invalid index.");
+		}
 	}
+
+	/**
+	* Returns data from a given x, y coordinate. 
+	* @param x the x position. 
+	* @param y the y position. 
+	* @return T the value read at the x, y position. 
+	*/
 	T getData(int x, int y) {
-		return mData[x][y];
+		if (x >= 0 && x < mXDim && y >= 0 && y < mYDim) {
+			return mData[x][y];
+		}
+		else {
+			throw new std::exception("Invalid index.");
+		}
 	}
 
 private:

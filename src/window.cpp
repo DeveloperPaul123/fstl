@@ -197,6 +197,9 @@ bool Window::load_mesh(const QString &filename) {
 	params.xOffset = -33.6875;
 	params.yOffset = -21.6805;
 	params.zOffset = -13.4055;
+	/*params.xOffset = 0.0;
+	params.yOffset = 0.0;
+	params.zOffset = 0.0;*/
 	MeshUtil::MeshLoader *loader = new MeshUtil::MeshLoader(this, filename, params);
 	connect(loader, &MeshUtil::MeshLoader::meshLoaded,
 		canvas, &Canvas::load_mesh_file);

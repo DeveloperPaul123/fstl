@@ -143,6 +143,10 @@ MHDInfo MHDLoader::readHeaderInfo() {
 	return info;
 }
 
+/**
+* Render class for a uchar volume in OpenGL. 
+* @param vol the volume to render. 
+*/
 GLPointCloud::GLPointCloud(UcharVolume* vol) :
 vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer) {
 	
@@ -314,7 +318,7 @@ bool INRSaver::saveVolume() {
 				}
 			}
 		}
-		
+		//close the file. 
 		output.close();
 		return true;
 	}

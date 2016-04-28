@@ -37,19 +37,23 @@ namespace MeshUtil {
 		}
 	};
 	struct Point {
+
+		float x;
+		float y;
+		float z;
+		
 		Point() {
 			x = 0.0;
 			y = 0.0;
 			z = 0.0;
 		}
-		Point(int x1, int y1, int z1) {
+
+		Point(float x1, float y1, float z1) {
 			x = x1;
 			y = y1;
 			z = z1;
 		}
-		float x;
-		float y;
-		float z;
+		
 		float distanceTo(Point p) {
 			float xDif = p.x - x;
 			float yDif = p.y - y;
@@ -62,11 +66,15 @@ namespace MeshUtil {
 		int x;
 		int y;
 		int z;
+		int _oldX, _oldY, _oldZ;
 
 		Triangle() {
 			x = 0;
 			y = 0;
 			z = 0;
+			_oldX = 0;
+			_oldY = 0;
+			_oldZ = 0;
 		}
 		Triangle(int x1, int y1, int z1) {
 			x = x1;
@@ -74,7 +82,11 @@ namespace MeshUtil {
 			z = z1;
 		}
 
+		/**
+		* Get a sorted copy of the current triangle. 
+		*/
 		void sort() {
+			_oldX = x; _oldY = y; _oldZ = z;
 			std::vector<int> vals;
 			vals.push_back(x);
 			vals.push_back(y);
@@ -84,6 +96,11 @@ namespace MeshUtil {
 			y = vals[1];
 			z = vals[2];
 		}
+
+		void unsort() {
+			x = _oldX; y = _oldY; z = _oldZ;
+		}
+
 		/**
 		* Comparison operator for sorting. Sort by x, then y, then z
 		* @param other other Triangle to compare to.
@@ -175,15 +192,6 @@ namespace MeshUtil {
 		}
 	};
 
-	/**
-	* Checks a vector of tetrahedron against a vector of nodes (index points from the verticies) to
-	* see if a given node is a member of the tetrahedron, if it is, it will be in the returned vector.
-	* @param tets the vector of tetrahedrons
-	* @param nodes vector of nodes to look for.
-	* @return std::vector<Tetrahedron> new vector of tetrahedron that had members matching the nodes.
-	*/
-	std::vector<Tetrahedron> isMember(std::vector<Tetrahedron> tets, std::vector<int> nodes);
-
 	class Mesh {
 	public:
 		Mesh(std::vector<Point> verts, std::vector<Triangle> ts, std::vector<Tetrahedron> tts);
@@ -217,9 +225,6 @@ namespace MeshUtil {
 		float ymax() const { return max(1); }
 		float zmax() const { return max(2); }
 	private:
-		QGLBuffer vertices;
-		QGLBuffer indices;
-
 		std::vector<GLfloat> mVerts;
 		std::vector<GLuint> mInd;
 	};
