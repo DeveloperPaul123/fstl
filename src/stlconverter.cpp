@@ -17,10 +17,10 @@ namespace StlConverter {
 	* Performs the conversion.
 	*/
 	void Converter::convert() {
-		//open output and write .stl as ascii. 
+		//open output and write .stl as ascii. a
 		std::ofstream out;
 		out.open(path);
-		out << "solid ascii";
+		out << "solid ascii" << '\n';
 		for (auto t : data) {
 			auto nor = t.normal();
 			out << "  facet normal " << nor.x << ' ' << nor.y << ' ' << nor.z << '\n';
@@ -28,8 +28,8 @@ namespace StlConverter {
 			out << "      vertex " << t.p1.x << ' ' << t.p1.y << ' ' << t.p1.z << '\n';
 			out << "      vertex " << t.p2.x << ' ' << t.p2.y << ' ' << t.p2.z << '\n';
 			out << "      vertex " << t.p3.x << ' ' << t.p3.y << ' ' << t.p3.z << '\n';
-			out << "    end loop" << '\n';
-			out << "  end facet" << '\n';
+			out << "    endloop" << '\n';
+			out << "  endfacet" << '\n';
 		}	
 		out << "end solid";
 		out.close();

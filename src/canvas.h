@@ -9,6 +9,7 @@
 
 #include "medical.h"
 #include "mesh_util.h"
+#include "stlconverter.h"
 
 class GLMesh;
 class Mesh;

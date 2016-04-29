@@ -78,6 +78,16 @@ void Canvas::load_volume(UcharVolume *vol) {
 void Canvas::load_mesh_file(MeshUtil::Mesh* m) {
 	mesh = NULL;
 	cloud = NULL;
+	std::vector<MeshUtil::Triangle> tris = m->getSurfaceFaces();
+	std::vector<MeshUtil::TriangleF> ftris;
+	ftris.reserve(tris.size());
+	for (auto t : tris) {
+		MeshUtil::TriangleF tr(m->getPoint(t.x-1), m->getPoint(t.y-1), m->getPoint(t.z - 1));
+		ftris.push_back(tr);
+	}
+	StlConverter::Converter *converter = new StlConverter::Converter(ftris, std::string("C:\\Users\\Paul T\\Desktop\\out_test.stl"));
+	converter->convert();
+
 	meshFromFile = new MeshUtil::GLMesh(m);
 	center = QVector3D(meshFromFile->xmin() + meshFromFile->xmax(),
 		meshFromFile->ymin() + meshFromFile->ymax(),

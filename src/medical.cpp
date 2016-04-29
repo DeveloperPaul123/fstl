@@ -269,7 +269,8 @@ void INRSaver::run() {
 }
 
 /**
-* Saves the actual volume. 
+* Saves the actual volume, see here for info: 
+* http://serdis.dis.ulpgc.es/~krissian/InrView1/IOformat.html
 * @return true if saved successfully, false otherwise. 
 */
 bool INRSaver::saveVolume() {
