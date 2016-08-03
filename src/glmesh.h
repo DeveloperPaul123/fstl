@@ -9,7 +9,7 @@ class Mesh;
 class GLMesh : protected QGLFunctions
 {
 public:
-    GLMesh(const Mesh* const mesh);
+	explicit GLMesh(const Mesh* const mesh);
     void draw(GLuint vp);
 private:
     QGLBuffer vertices;

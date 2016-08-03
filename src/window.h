@@ -17,8 +17,8 @@ public:
 	bool load_mesh(const QString& filename);
 
 protected:
-    void dragEnterEvent(QDragEnterEvent* event);
-    void dropEvent(QDropEvent* event);
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 
 public slots:
     void on_open();
@@ -30,8 +30,8 @@ public slots:
 	void on_inr_save_failed();
 	void save_inr(UcharVolume *vol);
 
-    void enable_open();
-    void disable_open();
+    void enable_open() const;
+    void disable_open() const;
 
 private:
     QAction* const open_action;

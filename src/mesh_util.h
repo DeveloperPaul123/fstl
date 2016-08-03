@@ -1,20 +1,15 @@
 #ifndef MESH_UTIL_H
 #define MESH_UTIL_H
 
-#include <iostream>
-#include <string>
 #include <vector>
 #include <fstream>
-#include <sstream>
 
 #include <QObject>
 #include <QString>
 #include <QFile>
 #include <QThread>
 #include <QTextStream>
-#include <QDataStream>
 
-#include <QtOpenGL/QGLBuffer>
 #include <QtOpenGL/QGLFunctions>
 
 #include "mesh_util_core.h"
@@ -82,7 +77,7 @@ namespace MeshUtil {
 
 	public: 
 		explicit MeshLoader(QObject *parent, QString filename, MeshParams params);
-		void run();
+		void run() override;
 
 	signals:
 		void meshLoaded(Mesh *mesh);

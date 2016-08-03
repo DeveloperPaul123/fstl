@@ -157,17 +157,17 @@ vertices(QGLBuffer::VertexBuffer), indices(QGLBuffer::IndexBuffer) {
 	vertices.setUsagePattern(QGLBuffer::StaticDraw);
 	indices.setUsagePattern(QGLBuffer::StaticDraw);
 
-	int pointCount = 0;
-	int size = vol->getNumSlices();
+	auto pointCount = 0;
+	auto size = vol->getNumSlices();
 	for (int i = 0; i < size; i++) {
 		Slice<uchar> slice = vol->getSlice(i);
-		for (int y = 0; y < slice.getYSize(); y++) {
-			for (int x = 0; x < slice.getXSize(); x++) {
-				uchar data = slice.getData(x, y);
+		for (auto y = 0; y < slice.getYSize(); y++) {
+			for (auto x = 0; x < slice.getXSize(); x++) {
+				auto data = slice.getData(x, y);
 				if (data != 0) {
-					float xVal = (float)x;
-					float yVal = (float)y;
-					float zVal = (float)i;
+					auto xVal = static_cast<float>(x);
+					auto yVal = static_cast<float>(y);
+					auto zVal = static_cast<float>(i);
 					if (vol->getXOffset() != 0.0) {
 						xVal += vol->getXOffset();
 					}
@@ -208,9 +208,9 @@ void GLPointCloud::draw(GLuint vp) {
 	vertices.bind();
 	indices.bind();
 
-	glVertexAttribPointer(vp, 3, GL_FLOAT, false, 3 * sizeof(float), NULL);
+	glVertexAttribPointer(vp, 3, GL_FLOAT, false, 3 * sizeof(float), nullptr);
 	glDrawElements(GL_POINTS, indices.size() / sizeof(uint32_t),
-		GL_UNSIGNED_INT, NULL);
+		GL_UNSIGNED_INT, nullptr);
 
 	vertices.release();
 	indices.release();
@@ -273,7 +273,8 @@ void INRSaver::run() {
 * http://serdis.dis.ulpgc.es/~krissian/InrView1/IOformat.html
 * @return true if saved successfully, false otherwise. 
 */
-bool INRSaver::saveVolume() {
+bool INRSaver::saveVolume() const
+{
 	if (mVol) {
 		std::ofstream output;
 		//open as binary. 
@@ -305,16 +306,16 @@ bool INRSaver::saveVolume() {
 		output << '#' <<'#'<<'}' << '\n';
 		
 		//now write the pixel data, row by row, column by column, slice by slice. 
-		int slices = mVol->getNumSlices();
-		for (int z = 0; z < slices; z++) {
+		auto slices = mVol->getNumSlices();
+		for (auto z = 0; z < slices; z++) {
 			//get the slice. 
 			Slice<uchar> slice = mVol->getSlice(z);
-			int xDim = slice.getXSize();
-			int yDim = slice.getYSize();
-			for (int y = 0; y < yDim; y++) {
-				for (int x = 0; x < xDim; x++) {
+			auto x_dim = slice.getXSize();
+			auto y_dim = slice.getYSize();
+			for (auto y = 0; y < y_dim; y++) {
+				for (auto x = 0; x < x_dim; x++) {
 					//go through one row at a time and write each column. 
-					uchar val = slice.getData(x, y);
+					auto val = slice.getData(x, y);
 					output << val;
 				}
 			}

@@ -1,7 +1,3 @@
-#include <QMenuBar>
-#include <QMessageBox>
-#include <QFileDialog>
-
 #include "window.h"
 #include "canvas.h"
 #include "loader.h"
@@ -123,7 +119,7 @@ void Window::on_bad_stl()
 /**
 * Enables the open action. 
 */
-void Window::enable_open()
+void Window::enable_open() const
 {
     open_action->setEnabled(true);
 }
@@ -131,7 +127,7 @@ void Window::enable_open()
 /**
 * Disables the open action. 
 */
-void Window::disable_open()
+void Window::disable_open() const
 {
     open_action->setEnabled(false);
 }
@@ -241,8 +237,13 @@ void Window::dragEnterEvent(QDragEnterEvent *event)
     if (event->mimeData()->hasUrls())
     {
         auto urls = event->mimeData()->urls();
-        if (urls.size() == 1 && urls.front().path().endsWith(".stl"))
-            event->acceptProposedAction();
+		if (urls.size() == 1 && urls.front().path().endsWith(".stl")){
+			event->acceptProposedAction();
+		}
+		else if (urls.size() == 1 && urls.front().path().endsWith(".mesh"))
+		{
+			event->acceptProposedAction();
+		}
     }
 }
 
@@ -252,5 +253,13 @@ void Window::dragEnterEvent(QDragEnterEvent *event)
 */
 void Window::dropEvent(QDropEvent *event)
 {
-    load_stl(event->mimeData()->urls().front().toLocalFile());
+	if (event->mimeData()->urls().front().path().endsWith(".stl"))
+	{
+		load_stl(event->mimeData()->urls().front().toLocalFile());
+	}
+	else if (event->mimeData()->urls().front().path().endsWith(".mesh"))
+	{
+		load_mesh(event->mimeData()->urls().front().toLocalFile());
+	}
+    
 }

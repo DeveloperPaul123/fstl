@@ -1,15 +1,11 @@
 #ifndef CANVAS_H
 #define CANVAS_H
 
-#include <QWidget>
-#include <QtOpenGL/QGLWidget>
-#include <QtOpenGL/QGLFunctions>
 #include <QtOpenGL/QGLShaderProgram>
 #include <QMatrix4x4>
 
 #include "medical.h"
 #include "mesh_util.h"
-#include "stlconverter.h"
 
 class GLMesh;
 class Mesh;
@@ -20,8 +16,8 @@ class Canvas : public QGLWidget, protected QGLFunctions
     Q_OBJECT
 
 public:
-    Canvas(const QGLFormat& format, QWidget* parent=0);
-    ~Canvas();
+	explicit Canvas(const QGLFormat& format, QWidget* parent=nullptr);
+	~Canvas();
 
 public slots:
     void set_status(const QString& s);
@@ -31,13 +27,13 @@ public slots:
 	void load_mesh_file(MeshUtil::Mesh *m);
 
 protected:
-	void initializeGL();
-	void resizeGL(int width, int height);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* event);
-    void wheelEvent(QWheelEvent* event);
-    void paintEvent(QPaintEvent* event);
+	void initializeGL() override;
+	void resizeGL(int width, int height) override;
+	void mousePressEvent(QMouseEvent* event) override;
+	void mouseReleaseEvent(QMouseEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void wheelEvent(QWheelEvent* event) override;
+	void paintEvent(QPaintEvent* event) override;
 
 
 private:

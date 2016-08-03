@@ -1,8 +1,6 @@
 #ifndef LOADER_H
 #define LOADER_H
 
-#include <QThread>
-
 #include "mesh.h"
 
 class Loader : public QThread
@@ -10,7 +8,7 @@ class Loader : public QThread
     Q_OBJECT
 public:
     explicit Loader(QObject* parent, const QString& filename);
-    void run();
+    void run() override;
 
 protected:
     Mesh* load_stl();

@@ -1,5 +1,4 @@
 #include <QMouseEvent>
-#include <QDebug>
 
 #include <cmath>
 
@@ -7,9 +6,10 @@
 #include "backdrop.h"
 #include "glmesh.h"
 #include "mesh.h"
+#include "stlconverter.h"
 
 Canvas::Canvas(const QGLFormat& format, QWidget *parent)
-	: QGLWidget(format, parent), mesh(NULL), cloud(NULL), meshFromFile(NULL),
+	: QGLWidget(format, parent), mesh(nullptr), cloud(nullptr), meshFromFile(nullptr),
       scale(1), zoom(1), tilt(90), yaw(0), status(" ")
 {
     // Nothing to do here

@@ -1,18 +1,13 @@
 #ifndef MEDICAL_H
 #define MEDICAL_H
 #include <vector>
-#include <iostream>
 #include <fstream>
 #include <QObject>
 #include <QString>
 #include <QThread>
-#include <QFile>
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
-#include <QDataStream>
-#include <QVector>
-#include <QVector3D>
 #include <QtOpenGL/QGLBuffer>
 #include <QtOpenGL/QGLFunctions>
 
@@ -286,7 +281,7 @@ public:
 	void run();
 
 protected:
-	bool saveVolume();
+	bool saveVolume() const;
 
 signals:
 	void volumeSavedSuccessfully();
