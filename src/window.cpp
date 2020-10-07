@@ -15,6 +15,7 @@ Window::Window(QWidget *parent) :
     orthogonal_action(new QAction("Orthographic", this)),
     shaded_action(new QAction("Shaded", this)),
     wireframe_action(new QAction("Wireframe", this)),
+    axes_action(new QAction("Draw Axes", this)),
     reload_action(new QAction("Reload", this)),
     autoreload_action(new QAction("Autoreload", this)),
     save_screenshot_action(new QAction("Save Screenshot", this)),
@@ -111,6 +112,10 @@ Window::Window(QWidget *parent) :
     drawModes->setExclusive(true);
     QObject::connect(drawModes, &QActionGroup::triggered,
                      this, &Window::on_drawMode);
+    view_menu->addAction(axes_action);
+    axes_action->setCheckable(true);
+    QObject::connect(axes_action, &QAction::triggered,
+            this, &Window::on_drawAxes);
 
     auto help_menu = menuBar()->addMenu("Help");
     help_menu->addAction(about_action);
@@ -153,14 +158,6 @@ void Window::on_empty_mesh()
     QMessageBox::critical(this, "Error",
                           "<b>Error:</b><br>"
                           "This file is syntactically correct<br>but contains no triangles.");
-}
-
-void Window::on_confusing_stl()
-{
-    QMessageBox::warning(this, "Warning",
-                         "<b>Warning:</b><br>"
-                         "This <code>.stl</code> file begins with <code>solid </code>but appears to be a binary file.<br>"
-                         "<code>fstl</code> loaded it, but other programs may be confused by this file.");
 }
 
 void Window::on_missing_file()
@@ -224,6 +221,11 @@ void Window::on_drawMode(QAction* mode)
     {
         canvas->draw_wireframe();
     }
+}
+
+void Window::on_drawAxes(bool d)
+{
+    canvas->draw_axes(d);
 }
 
 void Window::on_watched_change(const QString& filename)
@@ -347,8 +349,6 @@ bool Window::load_stl(const QString& filename, bool is_reload)
               this, &Window::on_bad_stl);
     connect(loader, &Loader::error_empty_mesh,
               this, &Window::on_empty_mesh);
-    connect(loader, &Loader::warning_confusing_stl,
-              this, &Window::on_confusing_stl);
     connect(loader, &Loader::error_missing_file,
               this, &Window::on_missing_file);
 
